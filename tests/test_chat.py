@@ -54,6 +54,30 @@ class ChatTests(unittest.TestCase):
         self.assertIn("laptop model or specifications", result)
         self.assertIn("quoted unit price and currency", result)
 
+    def test_process_question_is_general_chat_even_during_procurement(self) -> None:
+        history = [message("user", "Analyze a quote", "procurement_request")]
+
+        result = classify_chat_intent("What details do you need from me?", history, None)
+
+        self.assertEqual(result, "general_chat")
+
+    def test_repeated_missing_details_advance_to_first_question(self) -> None:
+        history = [
+            message(
+                "assistant",
+                "Please send the laptop model, condition, quantity, and unit price.",
+                "procurement_request",
+            )
+        ]
+
+        result = _missing_details_reply(
+            ["product", "condition", "quantity", "quoted_price"],
+            history,
+        )
+
+        self.assertIn("let’s start with the laptop model or specifications", result)
+        self.assertNotIn("how many units", result)
+
     def test_prior_procurement_message_makes_short_reply_a_clarification(self) -> None:
         history = [message("user", "I need a laptop", "procurement_request")]
 

@@ -32,7 +32,7 @@ def _procurement_context(history, current_message: str) -> str:
     return "\n".join([*user_messages[-5:], current_message])
 
 
-def _missing_details_reply(missing_fields: list[str]) -> str:
+def _missing_details_reply(missing_fields: list[str], history=()) -> str:
     labels = {
         "product": "the laptop model or specifications",
         "condition": "whether it is new, used, or refurbished",
@@ -42,6 +42,15 @@ def _missing_details_reply(missing_fields: list[str]) -> str:
     details = [labels.get(field, field.replace("_", " ")) for field in missing_fields]
     if not details:
         return "Tell me a little more about the purchase you want me to assess."
+    previous_assistant_replies = [
+        item.content.casefold() for item in history if item.role == "assistant"
+    ]
+    already_explained = any(
+        "laptop model" in reply and "unit price" in reply
+        for reply in previous_assistant_replies[-3:]
+    )
+    if already_explained:
+        return f"Absolutely—let’s start with {details[0]}. What do you have in mind?"
     if len(details) == 1:
         joined = details[0]
     else:
@@ -92,7 +101,7 @@ def handle_chat_message(
                 _procurement_context(history, data.message)
             )
             if extraction.procurement_request is None:
-                reply = _missing_details_reply(extraction.missing_fields)
+                reply = _missing_details_reply(extraction.missing_fields, history)
             else:
                 analysis = analyze_procurement_request(
                     session,

@@ -15,6 +15,11 @@ FOLLOW_UP_TERMS = re.compile(
     r"price|source|supplier|result|analysis)\b",
     re.IGNORECASE,
 )
+PROCESS_GUIDANCE_TERMS = re.compile(
+    r"\b(what|which)\s+(details|information)\b.*\b(need|required|provide|send)\b|"
+    r"\bwhat do you need\b|\bhow (?:do|should|can) (?:i|we)\b.*\b(quote|request|analysis)\b",
+    re.IGNORECASE,
+)
 
 
 def classify_chat_intent(
@@ -25,6 +30,8 @@ def classify_chat_intent(
     normalized = " ".join(text.casefold().strip(" .!?" ).split())
     if normalized in GREETINGS:
         return "greeting"
+    if PROCESS_GUIDANCE_TERMS.search(text):
+        return "general_chat"
     if analysis_id is not None and FOLLOW_UP_TERMS.search(text):
         return "analysis_follow_up"
     if PROCUREMENT_REQUEST_TERMS.search(text):
