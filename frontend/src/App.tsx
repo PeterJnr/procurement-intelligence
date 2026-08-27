@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import { AlertCircle, Bot, Menu, Sparkles, UserRound } from "lucide-react";
+import { AlertCircle, Bot, Menu, Moon, Sparkles, Sun, UserRound } from "lucide-react";
 import { ApiError, sendChatMessage } from "./api";
 import { Sidebar } from "./components/Sidebar";
 import { Composer } from "./components/Composer";
@@ -9,6 +9,7 @@ import { AssistantMarkdown } from "./components/AssistantMarkdown";
 import type { ChatMessage, Conversation } from "./types";
 
 const STORAGE_KEY = "procura-ai-conversations-v1";
+const THEME_STORAGE_KEY = "procura-ai-theme";
 const EXAMPLES = [
   "Analyze 50 new Dell Latitude 5440 laptops, Core i5, 16GB RAM, 512GB SSD, quoted at ₦850,000 each.",
   "What information do you need to assess a laptop quote?",
@@ -29,6 +30,12 @@ function loadConversations(): Conversation[] {
   } catch { return [createConversation()]; }
 }
 
+function loadTheme(): "light" | "dark" {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  if (saved === "light" || saved === "dark") return saved;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
 export default function App() {
   const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
   const [activeId, setActiveId] = useState(() => conversations[0].localId);
@@ -37,6 +44,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [evidenceAnalysis, setEvidenceAnalysis] = useState<Conversation["analysis"]>(null);
+  const [theme, setTheme] = useState<"light" | "dark">(loadTheme);
   const endRef = useRef<HTMLDivElement>(null);
   const active = useMemo(() => conversations.find((item) => item.localId === activeId) || conversations[0], [conversations, activeId]);
   const suggestions = useMemo(() => {
@@ -64,6 +72,11 @@ export default function App() {
   }, [active]);
 
   useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations)); }, [conversations]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+  }, [theme]);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [active.messages.length, loading]);
 
   const patchActive = (patcher: (conversation: Conversation) => Conversation) => {
@@ -128,6 +141,14 @@ export default function App() {
           <button className="icon-button menu-button" onClick={() => setSidebarOpen(true)} aria-label="Open conversations"><Menu size={21} /></button>
           <div><strong>{active.title}</strong><span><i /> Evidence-backed assistant</span></div>
           <div className="topbar-badge"><Sparkles size={14} /> Procurement intelligence</div>
+          <button
+            className="icon-button theme-toggle"
+            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
         </header>
         <div className="chat-scroll">
           <div className="chat-content">
