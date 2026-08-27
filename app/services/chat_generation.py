@@ -33,6 +33,12 @@ def deterministic_chat_fallback(intent: str, analysis_snapshot=None) -> str:
         explanation = analysis_snapshot.get("analysis_explanation")
         if explanation:
             return explanation
+    if intent == "general_chat":
+        return (
+            "I can help you narrow down the right laptop. Tell me your budget, "
+            "main workloads or games, preferred screen size, and how much portability "
+            "matters, and I’ll recommend the specifications to prioritize."
+        )
     return (
         "I can help with business-laptop procurement questions, specifications, "
         "market evidence, and previous analysis results."

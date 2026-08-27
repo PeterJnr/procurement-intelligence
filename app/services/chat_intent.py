@@ -5,9 +5,9 @@ from app.models.conversation_schema import ConversationIntent
 
 
 GREETINGS = {"hi", "hello", "hey", "good morning", "good afternoon", "good evening"}
-PROCUREMENT_TERMS = re.compile(
-    r"\b(laptop|notebook|procure|procurement|quotation|quoted|quote|supplier|"
-    r"dell|latitude|hp|elitebook|probook|lenovo|thinkpad|ram|ssd)\b",
+PROCUREMENT_REQUEST_TERMS = re.compile(
+    r"\b(procure|procurement|quotation|quoted|quote|supplier|vendor|unit price|"
+    r"bulk order|purchase order|rfq)\b",
     re.IGNORECASE,
 )
 FOLLOW_UP_TERMS = re.compile(
@@ -27,7 +27,7 @@ def classify_chat_intent(
         return "greeting"
     if analysis_id is not None and FOLLOW_UP_TERMS.search(text):
         return "analysis_follow_up"
-    if PROCUREMENT_TERMS.search(text):
+    if PROCUREMENT_REQUEST_TERMS.search(text):
         return "procurement_request"
     previous_user_intents = {
         message.intent

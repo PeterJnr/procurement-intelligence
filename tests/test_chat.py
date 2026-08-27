@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 from app.models.conversation_schema import ChatMessageInput
 from app.models.procurement_request import ProcurementRequest
-from app.services.chat import handle_chat_message
+from app.services.chat import _missing_details_reply, handle_chat_message
 from app.services.chat_generation import generate_chat_reply
 from app.services.chat_intent import classify_chat_intent
 
@@ -34,6 +34,25 @@ class ChatTests(unittest.TestCase):
             classify_chat_intent("I need a Dell laptop quote", [], None),
             "procurement_request",
         )
+
+    def test_laptop_advice_is_general_chat_not_quote_analysis(self) -> None:
+        self.assertEqual(
+            classify_chat_intent(
+                "Talk to me about the right laptop for gaming",
+                [],
+                None,
+            ),
+            "general_chat",
+        )
+
+    def test_missing_procurement_details_are_explained_naturally(self) -> None:
+        result = _missing_details_reply(
+            ["product", "condition", "quantity", "quoted_price"]
+        )
+
+        self.assertNotIn("quoted_price", result)
+        self.assertIn("laptop model or specifications", result)
+        self.assertIn("quoted unit price and currency", result)
 
     def test_prior_procurement_message_makes_short_reply_a_clarification(self) -> None:
         history = [message("user", "I need a laptop", "procurement_request")]
