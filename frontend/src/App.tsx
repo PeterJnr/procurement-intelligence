@@ -114,7 +114,7 @@ export default function App() {
         ? caught.status === 429 ? `You have sent requests too quickly. Try again${caught.retryAfter ? ` in ${caught.retryAfter} seconds` : " shortly"}.`
           : caught.status >= 500 ? "The analysis service is temporarily unavailable. Your message is saved—please try again."
           : caught.message
-        : "Could not reach the backend. Confirm FastAPI is running on port 8000.";
+        : "Could not reach the analysis service. Please try again shortly.";
       setError(message);
       patchActive((conversation) => ({ ...conversation, messages: conversation.messages.map((item) => item.id === userMessage.id ? { ...item, status: "failed" } : item) }));
     } finally { setLoading(false); }

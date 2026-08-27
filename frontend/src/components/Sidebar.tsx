@@ -35,7 +35,7 @@ export function Sidebar({ conversations, activeId, open, onClose, onNew, onSelec
             </button>
           ))}
         </nav>
-        <div className="sidebar-footer"><span className="status-dot" /> API connected via local backend</div>
+        <div className="sidebar-footer"><span className="status-dot" /> Procurement API connected</div>
       </aside>
     </>
   );
