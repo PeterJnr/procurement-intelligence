@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Annotated
 import uuid
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -458,3 +460,10 @@ def get_semantic_calibration(
             status_code=500,
             detail="Could not calibrate semantic matching",
         ) from error
+
+
+# In production the frontend is compiled into this directory and served from the
+# same origin as the API. Keeping this mount last ensures API routes win first.
+frontend_dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if frontend_dist.is_dir():
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
