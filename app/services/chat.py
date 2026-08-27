@@ -1,0 +1,133 @@
+from sqlalchemy.orm import Session
+
+from app.models.conversation_schema import (
+    ChatMessageInput,
+    ChatResponse,
+    ConversationMessageResponse,
+    ConversationResponse,
+)
+from app.models.procurement_analysis import ProcurementAnalysisResponse
+from app.repositories.conversation import (
+    append_conversation_message,
+    create_conversation,
+    get_chat_analysis,
+    get_conversation,
+    link_conversation_analysis,
+    list_recent_conversation_messages,
+)
+from app.repositories.procurement_analysis_run import save_procurement_analysis_run
+from app.services.chat_generation import generate_chat_reply
+from app.services.chat_intent import classify_chat_intent
+from app.services.huggingface_extraction import (
+    HuggingFaceExtractionError,
+    HuggingFaceNotConfiguredError,
+    HuggingFaceTimeoutError,
+    extract_procurement_request,
+)
+from app.services.procurement_analysis import analyze_procurement_request
+
+
+def _procurement_context(history, current_message: str) -> str:
+    user_messages = [item.content for item in history if item.role == "user"]
+    return "\n".join([*user_messages[-5:], current_message])
+
+
+def handle_chat_message(
+    session: Session,
+    data: ChatMessageInput,
+) -> ChatResponse:
+    response_analysis: ProcurementAnalysisResponse | None = None
+    if data.conversation_id is None:
+        conversation = create_conversation(
+            session,
+            title=data.message,
+            analysis_id=data.analysis_id,
+        )
+    else:
+        conversation = get_conversation(session, data.conversation_id)
+        if data.analysis_id is not None:
+            conversation = link_conversation_analysis(
+                session,
+                conversation.id,
+                data.analysis_id,
+            )
+
+    history = list_recent_conversation_messages(session, conversation.id)
+    intent = classify_chat_intent(data.message, history, conversation.analysis_id)
+    user_message = append_conversation_message(
+        session,
+        conversation.id,
+        role="user",
+        content=data.message,
+        intent=intent,
+    )
+
+    analysis_run = (
+        get_chat_analysis(session, conversation.analysis_id)
+        if conversation.analysis_id is not None
+        else None
+    )
+    analysis_snapshot = analysis_run.analysis_snapshot if analysis_run else None
+
+    if intent in {"procurement_request", "clarification"} and analysis_run is None:
+        try:
+            extraction = extract_procurement_request(
+                _procurement_context(history, data.message)
+            )
+            if extraction.procurement_request is None:
+                missing = ", ".join(extraction.missing_fields)
+                reply = f"I still need the following information: {missing}."
+            else:
+                analysis = analyze_procurement_request(
+                    session,
+                    extraction.procurement_request,
+                )
+                saved_run = save_procurement_analysis_run(session, analysis)
+                conversation = link_conversation_analysis(
+                    session,
+                    conversation.id,
+                    saved_run.id,
+                )
+                analysis_run = saved_run
+                analysis_snapshot = saved_run.analysis_snapshot
+                if isinstance(analysis, ProcurementAnalysisResponse):
+                    response_analysis = analysis.model_copy(
+                        update={"analysis_id": saved_run.id}
+                    )
+                reply = analysis.analysis_explanation
+        except (
+            HuggingFaceExtractionError,
+            HuggingFaceNotConfiguredError,
+            HuggingFaceTimeoutError,
+        ):
+            reply = (
+                "I could not reliably extract the procurement details right now. "
+                "Please try again or provide the product, condition, quantity, and "
+                "quoted unit price explicitly."
+            )
+    else:
+        reply = generate_chat_reply(
+            data.message,
+            intent,
+            history,
+            analysis_snapshot,
+        )
+
+    assistant_message = append_conversation_message(
+        session,
+        conversation.id,
+        role="assistant",
+        content=reply,
+        intent=intent,
+    )
+    conversation = get_conversation(session, conversation.id)
+    return ChatResponse(
+        conversation=ConversationResponse.model_validate(conversation),
+        user_message=ConversationMessageResponse.model_validate(user_message),
+        assistant_message=ConversationMessageResponse.model_validate(
+            assistant_message
+        ),
+        intent=intent,
+        analysis_id=conversation.analysis_id,
+        analysis=response_analysis,
+    )
