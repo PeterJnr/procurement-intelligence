@@ -24,7 +24,7 @@ services:
       - key: AI_RATE_LIMIT_WINDOW_SECONDS
         value: "60"
       - key: CORS_ALLOWED_ORIGINS
-        value: "https://procurement-intelligence-ohbs.onrender.com,https://frontend-8tg2jxopm-peterjnrs-projects.vercel.app"
+        value: "https://procurement-intelligence-ohbs.onrender.com,https://frontend-8tg2jxopm-peterjnrs-projects.vercel.app,https://frontend-git-main-peterjnrs-projects.vercel.app"
       - key: ENABLE_CHAT_AI
         value: "true"
       - key: ENABLE_LANGCHAIN_EXPLANATION
