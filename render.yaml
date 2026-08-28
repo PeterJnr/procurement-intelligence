@@ -25,6 +25,12 @@ services:
         value: "60"
       - key: CORS_ALLOWED_ORIGINS
         value: "https://procurement-intelligence-ohbs.onrender.com,https://frontend-rho-beige-67.vercel.app"
+      - key: ENABLE_AUTH
+        value: "true"
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: CLERK_AUTHORIZED_PARTIES
+        value: "https://frontend-rho-beige-67.vercel.app"
       - key: ENABLE_CHAT_AI
         value: "true"
       - key: ENABLE_LANGCHAIN_EXPLANATION

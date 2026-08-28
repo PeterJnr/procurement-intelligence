@@ -9,11 +9,14 @@ from app.models.procurement_analysis_run_schema import ProcurementAnalysisRunFil
 def save_procurement_analysis_run(
     session: Session,
     analysis: ProcurementAnalysisResponse,
+    *,
+    owner_id: str | None = None,
 ) -> ProcurementAnalysisRun:
     normalized = analysis.normalized_product
     request = analysis.request
     recommendation = analysis.recommendation
     run = ProcurementAnalysisRun(
+        owner_id=owner_id,
         product_name=normalized.product_name,
         manufacturer=normalized.manufacturer,
         product_line=normalized.product_line,
@@ -59,4 +62,3 @@ def list_procurement_analysis_runs(
         filters.limit
     )
     return list(session.scalars(statement).all())
-

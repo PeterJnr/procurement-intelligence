@@ -16,6 +16,7 @@ class ConversationModelTests(unittest.TestCase):
 
         self.assertIn("ck_conversation_status", constraint_names)
         self.assertIn("ix_conversation_analysis_updated", index_names)
+        self.assertIn("ix_conversation_owner_updated", index_names)
 
     def test_messages_are_ordered_and_database_validated(self) -> None:
         constraint_names = {

@@ -3,6 +3,7 @@ import {
   Menu, MessageSquareText, Moon, ShieldCheck, Sparkles, Sun, X,
 } from "lucide-react";
 import { useState } from "react";
+import { Show, UserButton } from "@clerk/react";
 import { useTheme } from "../lib/theme";
 
 const workflow = [
@@ -33,7 +34,8 @@ export function LandingPage() {
           <a href="#how-it-works" onClick={() => setMenuOpen(false)}>How it works</a>
           <a href="#capabilities" onClick={() => setMenuOpen(false)}>Capabilities</a>
           <a href="#trust" onClick={() => setMenuOpen(false)}>Trust</a>
-          <a className="nav-cta" href="/app">Open assistant <ArrowRight size={15} /></a>
+          <Show when="signed-out"><a href="/sign-in">Sign in</a><a className="nav-cta" href="/sign-up">Create account <ArrowRight size={15} /></a></Show>
+          <Show when="signed-in"><a className="nav-cta" href="/app">Open assistant <ArrowRight size={15} /></a><UserButton /></Show>
         </nav>
         <div className="landing-actions">
           <button className="icon-button theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}>

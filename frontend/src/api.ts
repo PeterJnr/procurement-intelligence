@@ -8,10 +8,10 @@ export class ApiError extends Error {
   }
 }
 
-export async function sendChatMessage(message: string, conversationId?: string | null): Promise<ChatApiResponse> {
+export async function sendChatMessage(message: string, conversationId: string | null | undefined, token: string): Promise<ChatApiResponse> {
   const response = await fetch(`${API_BASE_URL}/chat`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ message, ...(conversationId ? { conversation_id: conversationId } : {}) }),
   });
 

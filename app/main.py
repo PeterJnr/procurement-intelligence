@@ -86,6 +86,7 @@ from app.repositories.conversation import (
     ConversationNotFoundError,
 )
 from app.rate_limit import enforce_ai_rate_limit
+from app.auth import require_user
 
 
 @asynccontextmanager
@@ -111,7 +112,7 @@ app.add_middleware(
     allow_origins=cors_allowed_origins(),
     allow_credentials=False,
     allow_methods=["GET", "POST", "PUT", "OPTIONS"],
-    allow_headers=["Content-Type", "X-Admin-API-Key"],
+    allow_headers=["Authorization", "Content-Type", "X-Admin-API-Key"],
 )
 
 
@@ -124,12 +125,13 @@ def health_check() -> dict[str, str]:
 @app.post("/chat", response_model=ChatResponse)
 def chat(
     data: ChatMessageInput,
+    user_id: Annotated[str, Depends(require_user)],
     session: Session = Depends(get_db_session),
     _: None = Depends(enforce_ai_rate_limit),
 ) -> ChatResponse:
     """Create or continue a context-aware procurement conversation."""
     try:
-        return handle_chat_message(session, data)
+        return handle_chat_message(session, data, user_id)
     except (ConversationNotFoundError, ChatAnalysisNotFoundError) as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except (ConversationArchivedError, ConversationAnalysisConflictError) as error:
@@ -170,6 +172,7 @@ def create_procurement_request(
 )
 def extract_natural_language_procurement_request(
     request: NaturalLanguageProcurementInput,
+    __: Annotated[str, Depends(require_user)],
     _: None = Depends(enforce_ai_rate_limit),
 ) -> NaturalLanguageProcurementResponse:
     """Convert a plain-English request into the validated internal structure."""
@@ -189,6 +192,7 @@ def extract_natural_language_procurement_request(
 )
 def create_natural_language_procurement_analysis(
     request: NaturalLanguageProcurementInput,
+    user_id: Annotated[str, Depends(require_user)],
     session: Session = Depends(get_db_session),
     _: None = Depends(enforce_ai_rate_limit),
 ) -> NaturalLanguageProcurementAnalysisResponse:
@@ -201,7 +205,7 @@ def create_natural_language_procurement_analysis(
             else None
         )
         if analysis is not None:
-            saved_run = save_procurement_analysis_run(session, analysis)
+            saved_run = save_procurement_analysis_run(session, analysis, owner_id=user_id)
             analysis = analysis.model_copy(update={"analysis_id": saved_run.id})
         return NaturalLanguageProcurementAnalysisResponse(
             extraction=extraction,
@@ -345,13 +349,14 @@ def backfill_market_vectors(
 )
 def create_procurement_analysis(
     request: ProcurementRequest,
+    user_id: Annotated[str, Depends(require_user)],
     session: Session = Depends(get_db_session),
     _: None = Depends(enforce_ai_rate_limit),
 ) -> ProcurementAnalysisResponse:
     """Run the current end-to-end procurement evidence workflow."""
     try:
         analysis = analyze_procurement_request(session, request)
-        saved_run = save_procurement_analysis_run(session, analysis)
+        saved_run = save_procurement_analysis_run(session, analysis, owner_id=user_id)
         return analysis.model_copy(update={"analysis_id": saved_run.id})
     except ValueError as error:
         raise HTTPException(status_code=422, detail=str(error)) from error

@@ -39,7 +39,7 @@ class ApiTests(unittest.TestCase):
             side_effect=HuggingFaceTimeoutError("provider timed out"),
         ):
             with self.assertRaises(HTTPException) as context:
-                extract_natural_language_procurement_request(text_request)
+                extract_natural_language_procurement_request(text_request, "user_test")
 
         self.assertEqual(context.exception.status_code, 504)
 

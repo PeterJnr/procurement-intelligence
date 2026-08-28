@@ -25,6 +25,7 @@ def message(role: str, content: str, intent: str, sequence: int = 1):
 
 
 CONVERSATION_ID = uuid.uuid4()
+USER_ID = "user_test_123"
 
 
 class ChatTests(unittest.TestCase):
@@ -128,7 +129,7 @@ class ChatTests(unittest.TestCase):
             message("assistant", "Hello there!", "greeting", 2),
         ]
 
-        result = handle_chat_message(MagicMock(), ChatMessageInput(message="Hello"))
+        result = handle_chat_message(MagicMock(), ChatMessageInput(message="Hello"), USER_ID)
 
         self.assertEqual(result.intent, "greeting")
         self.assertEqual(result.assistant_message.content, "Hello there!")
@@ -176,10 +177,11 @@ class ChatTests(unittest.TestCase):
             result = handle_chat_message(
                 MagicMock(),
                 ChatMessageInput(message="I need a Dell laptop quote"),
+                USER_ID,
             )
 
         analyze.assert_called_once()
-        link.assert_called_once_with(unittest.mock.ANY, CONVERSATION_ID, analysis_id)
+        link.assert_called_once_with(unittest.mock.ANY, CONVERSATION_ID, analysis_id, USER_ID)
         self.assertEqual(result.analysis_id, analysis_id)
         self.assertEqual(result.assistant_message.content, "Analysis complete.")
 

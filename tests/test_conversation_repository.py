@@ -17,6 +17,7 @@ class ConversationRepositoryTests(unittest.TestCase):
     def setUp(self) -> None:
         self.session = MagicMock(spec=Session)
         self.conversation_id = uuid.uuid4()
+        self.owner_id = "user_test_123"
 
     def test_append_assigns_next_locked_sequence(self) -> None:
         conversation = Conversation(id=self.conversation_id, status="active")
@@ -25,6 +26,7 @@ class ConversationRepositoryTests(unittest.TestCase):
         result = append_conversation_message(
             self.session,
             self.conversation_id,
+            owner_id=self.owner_id,
             role="user",
             content="Hello",
             intent="greeting",
@@ -43,6 +45,7 @@ class ConversationRepositoryTests(unittest.TestCase):
             append_conversation_message(
                 self.session,
                 self.conversation_id,
+                owner_id=self.owner_id,
                 role="user",
                 content="Hello",
                 intent="greeting",
@@ -63,6 +66,7 @@ class ConversationRepositoryTests(unittest.TestCase):
                 self.session,
                 self.conversation_id,
                 requested_analysis_id,
+                self.owner_id,
             )
 
 

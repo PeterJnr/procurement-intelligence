@@ -35,6 +35,13 @@ def validate_configuration() -> None:
     errors: list[str] = []
     _require(["DATABASE_URL", "MARKET_ADMIN_API_KEY"], errors, "Core API")
 
+    if feature_enabled("ENABLE_AUTH"):
+        _require(
+            ["CLERK_SECRET_KEY", "CLERK_AUTHORIZED_PARTIES"],
+            errors,
+            "Authentication",
+        )
+
     if feature_enabled("ENABLE_MARKET_SCHEDULER", "true"):
         _require(["CRAWLER_CONTACT"], errors, "Market scheduler")
 

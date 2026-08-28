@@ -83,11 +83,16 @@ class NaturalLanguageProcurementAnalysisTests(unittest.TestCase):
 
         result = create_natural_language_procurement_analysis(
             self.input,
+            "user_test",
             self.session,
         )
 
         analyze.assert_called_once_with(self.session, COMPLETE_REQUEST)
-        save.assert_called_once_with(self.session, expected_analysis)
+        save.assert_called_once_with(
+            self.session,
+            expected_analysis,
+            owner_id="user_test",
+        )
         self.assertIs(result.extraction, extracted)
         self.assertEqual(result.analysis.analysis_id, analysis_id)
         self.assertEqual(result.analysis.request, expected_analysis.request)
@@ -102,6 +107,7 @@ class NaturalLanguageProcurementAnalysisTests(unittest.TestCase):
 
         result = create_natural_language_procurement_analysis(
             self.input,
+            "user_test",
             self.session,
         )
 

@@ -1,4 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { useAuth, UserButton } from "@clerk/react";
 import { AlertCircle, Bot, Menu, Moon, Sparkles, Sun, UserRound } from "lucide-react";
 import { ApiError, sendChatMessage } from "./api";
 import { Sidebar } from "./components/Sidebar";
@@ -23,15 +24,20 @@ function createConversation(): Conversation {
   };
 }
 
-function loadConversations(): Conversation[] {
+function conversationStorageKey(userId: string) {
+  return `${STORAGE_KEY}:${userId}`;
+}
+
+function loadConversations(userId: string): Conversation[] {
   try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as Conversation[];
+    const parsed = JSON.parse(localStorage.getItem(conversationStorageKey(userId)) || "[]") as Conversation[];
     return Array.isArray(parsed) && parsed.length ? parsed : [createConversation()];
   } catch { return [createConversation()]; }
 }
 
 export default function App() {
-  const [conversations, setConversations] = useState<Conversation[]>(loadConversations);
+  const { getToken, userId } = useAuth();
+  const [conversations, setConversations] = useState<Conversation[]>(() => loadConversations(userId!));
   const [activeId, setActiveId] = useState(() => conversations[0].localId);
   const [draft, setDraft] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,7 +71,9 @@ export default function App() {
     ];
   }, [active]);
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations)); }, [conversations]);
+  useEffect(() => {
+    localStorage.setItem(conversationStorageKey(userId!), JSON.stringify(conversations));
+  }, [conversations, userId]);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [active.messages.length, loading]);
 
   const patchActive = (patcher: (conversation: Conversation) => Conversation) => {
@@ -92,7 +100,9 @@ export default function App() {
       messages: [...conversation.messages, userMessage],
     }));
     try {
-      const result = await sendChatMessage(content, currentBackendId);
+      const token = await getToken();
+      if (!token) throw new ApiError("Your session expired. Please sign in again.", 401);
+      const result = await sendChatMessage(content, currentBackendId, token);
       patchActive((conversation) => ({
         ...conversation,
         backendId: result.conversation.id,
@@ -138,6 +148,7 @@ export default function App() {
           >
             {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
+          <div className="account-button"><UserButton /></div>
         </header>
         <div className="chat-scroll">
           <div className="chat-content">

@@ -21,11 +21,13 @@ class ProcurementAnalysisRun(Base):
             "model_number",
             "created_at",
         ),
+        Index("ix_procurement_analysis_run_owner_created", "owner_id", "created_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
+    owner_id: Mapped[str | None] = mapped_column(String(100))
     product_name: Mapped[str] = mapped_column(String(200), nullable=False)
     manufacturer: Mapped[str | None] = mapped_column(String(100))
     product_line: Mapped[str | None] = mapped_column(String(100))
@@ -45,4 +47,3 @@ class ProcurementAnalysisRun(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
-

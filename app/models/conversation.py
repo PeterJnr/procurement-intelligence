@@ -18,6 +18,7 @@ class Conversation(Base):
             name="ck_conversation_status",
         ),
         Index("ix_conversation_analysis_updated", "analysis_id", "updated_at"),
+        Index("ix_conversation_owner_updated", "owner_id", "updated_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -25,6 +26,7 @@ class Conversation(Base):
         primary_key=True,
         default=uuid.uuid4,
     )
+    owner_id: Mapped[str | None] = mapped_column(String(100))
     analysis_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("procurement_analysis_runs.id", ondelete="SET NULL"),

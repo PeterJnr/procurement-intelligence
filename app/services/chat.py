@@ -61,35 +61,39 @@ def _missing_details_reply(missing_fields: list[str], history=()) -> str:
 def handle_chat_message(
     session: Session,
     data: ChatMessageInput,
+    user_id: str,
 ) -> ChatResponse:
     response_analysis: ProcurementAnalysisResponse | None = None
     if data.conversation_id is None:
         conversation = create_conversation(
             session,
+            owner_id=user_id,
             title=data.message,
             analysis_id=data.analysis_id,
         )
     else:
-        conversation = get_conversation(session, data.conversation_id)
+        conversation = get_conversation(session, data.conversation_id, user_id)
         if data.analysis_id is not None:
             conversation = link_conversation_analysis(
                 session,
                 conversation.id,
                 data.analysis_id,
+                user_id,
             )
 
-    history = list_recent_conversation_messages(session, conversation.id)
+    history = list_recent_conversation_messages(session, conversation.id, owner_id=user_id)
     intent = classify_chat_intent(data.message, history, conversation.analysis_id)
     user_message = append_conversation_message(
         session,
         conversation.id,
+        owner_id=user_id,
         role="user",
         content=data.message,
         intent=intent,
     )
 
     analysis_run = (
-        get_chat_analysis(session, conversation.analysis_id)
+        get_chat_analysis(session, conversation.analysis_id, user_id)
         if conversation.analysis_id is not None
         else None
     )
@@ -107,11 +111,12 @@ def handle_chat_message(
                     session,
                     extraction.procurement_request,
                 )
-                saved_run = save_procurement_analysis_run(session, analysis)
+                saved_run = save_procurement_analysis_run(session, analysis, owner_id=user_id)
                 conversation = link_conversation_analysis(
                     session,
                     conversation.id,
                     saved_run.id,
+                    user_id,
                 )
                 analysis_run = saved_run
                 analysis_snapshot = saved_run.analysis_snapshot
@@ -141,11 +146,12 @@ def handle_chat_message(
     assistant_message = append_conversation_message(
         session,
         conversation.id,
+        owner_id=user_id,
         role="assistant",
         content=reply,
         intent=intent,
     )
-    conversation = get_conversation(session, conversation.id)
+    conversation = get_conversation(session, conversation.id, user_id)
     return ChatResponse(
         conversation=ConversationResponse.model_validate(conversation),
         user_message=ConversationMessageResponse.model_validate(user_message),

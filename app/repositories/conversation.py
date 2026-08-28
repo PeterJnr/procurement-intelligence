@@ -25,20 +25,27 @@ class ChatAnalysisNotFoundError(LookupError):
     pass
 
 
-def _require_analysis(session: Session, analysis_id: uuid.UUID) -> None:
-    if session.get(ProcurementAnalysisRun, analysis_id) is None:
+def _require_analysis(session: Session, analysis_id: uuid.UUID, owner_id: str) -> None:
+    analysis = session.scalar(
+        select(ProcurementAnalysisRun).where(
+            ProcurementAnalysisRun.id == analysis_id,
+            ProcurementAnalysisRun.owner_id == owner_id,
+        )
+    )
+    if analysis is None:
         raise ChatAnalysisNotFoundError("Procurement analysis was not found")
 
 
 def create_conversation(
     session: Session,
     *,
+    owner_id: str,
     title: str,
     analysis_id: uuid.UUID | None = None,
 ) -> Conversation:
     if analysis_id is not None:
-        _require_analysis(session, analysis_id)
-    conversation = Conversation(title=title[:200], analysis_id=analysis_id)
+        _require_analysis(session, analysis_id, owner_id)
+    conversation = Conversation(owner_id=owner_id, title=title[:200], analysis_id=analysis_id)
     session.add(conversation)
     try:
         session.commit()
@@ -49,8 +56,13 @@ def create_conversation(
     return conversation
 
 
-def get_conversation(session: Session, conversation_id: uuid.UUID) -> Conversation:
-    conversation = session.get(Conversation, conversation_id)
+def get_conversation(session: Session, conversation_id: uuid.UUID, owner_id: str) -> Conversation:
+    conversation = session.scalar(
+        select(Conversation).where(
+            Conversation.id == conversation_id,
+            Conversation.owner_id == owner_id,
+        )
+    )
     if conversation is None:
         raise ConversationNotFoundError("Conversation was not found")
     if conversation.status != "active":
@@ -62,11 +74,12 @@ def link_conversation_analysis(
     session: Session,
     conversation_id: uuid.UUID,
     analysis_id: uuid.UUID,
+    owner_id: str,
 ) -> Conversation:
-    _require_analysis(session, analysis_id)
+    _require_analysis(session, analysis_id, owner_id)
     conversation = session.scalar(
         select(Conversation)
-        .where(Conversation.id == conversation_id)
+        .where(Conversation.id == conversation_id, Conversation.owner_id == owner_id)
         .with_for_update()
     )
     if conversation is None:
@@ -90,13 +103,14 @@ def append_conversation_message(
     session: Session,
     conversation_id: uuid.UUID,
     *,
+    owner_id: str,
     role: str,
     content: str,
     intent: str | None,
 ) -> ConversationMessage:
     conversation = session.scalar(
         select(Conversation)
-        .where(Conversation.id == conversation_id)
+        .where(Conversation.id == conversation_id, Conversation.owner_id == owner_id)
         .with_for_update()
     )
     if conversation is None:
@@ -130,11 +144,14 @@ def list_recent_conversation_messages(
     session: Session,
     conversation_id: uuid.UUID,
     *,
+    owner_id: str,
     limit: int = 12,
 ) -> list[ConversationMessage]:
     statement = (
         select(ConversationMessage)
+        .join(Conversation, Conversation.id == ConversationMessage.conversation_id)
         .where(ConversationMessage.conversation_id == conversation_id)
+        .where(Conversation.owner_id == owner_id)
         .order_by(ConversationMessage.sequence_number.desc())
         .limit(limit)
     )
@@ -144,8 +161,14 @@ def list_recent_conversation_messages(
 def get_chat_analysis(
     session: Session,
     analysis_id: uuid.UUID,
+    owner_id: str,
 ) -> ProcurementAnalysisRun:
-    analysis = session.get(ProcurementAnalysisRun, analysis_id)
+    analysis = session.scalar(
+        select(ProcurementAnalysisRun).where(
+            ProcurementAnalysisRun.id == analysis_id,
+            ProcurementAnalysisRun.owner_id == owner_id,
+        )
+    )
     if analysis is None:
         raise ChatAnalysisNotFoundError("Procurement analysis was not found")
     return analysis
