@@ -175,4 +175,75 @@ html { scroll-behavior: smooth; }
 @media(max-width:720px){.landing-nav{width:calc(100% - 28px);height:70px}.landing-menu{display:grid}.landing-links{display:none;position:absolute;top:64px;left:0;right:0;padding:15px;flex-direction:column;align-items:stretch;gap:4px;border:1px solid var(--line);border-radius:13px;background:var(--white);box-shadow:0 18px 35px rgba(0,0,0,.15)}.landing-links-open{display:flex}.landing-links>a{padding:11px}.landing-links .nav-cta{justify-content:center}.landing-hero{width:calc(100% - 28px);padding:50px 0 75px}.hero-copy h1{font-size:49px}.hero-copy>p{font-size:13px}.hero-trust{gap:9px}.product-preview{padding:17px}.preview-metrics{grid-template-columns:1fr}.preview-metrics>div{border-right:0;border-bottom:1px solid var(--line)}.preview-metrics>div:last-child{border-bottom:0}.signal-strip{justify-content:center;flex-wrap:wrap}.signal-strip i{display:none}.landing-section{width:calc(100% - 28px);padding:82px 0}.workflow-grid{grid-template-columns:1fr}.workflow-grid article,.workflow-grid article+article{padding:25px 0;border-left:0;border-bottom:1px solid var(--line)}.capabilities-section{width:100%;padding-inline:14px}.split-heading{display:block}.capability-grid{grid-template-columns:1fr}.capability-grid article{min-height:210px}.trust-section{grid-template-columns:1fr}.trust-visual{aspect-ratio:1.2}.landing-cta{margin-inline:10px;padding:75px 18px}.landing-footer{width:calc(100% - 28px);padding:25px 0;flex-wrap:wrap}.landing-footer p{width:100%;order:3;margin:0}.landing-footer>a:last-child{margin-left:auto}}
 @media(max-width:440px){.landing-brand small{display:none}.landing-actions .theme-toggle{margin-left:0}.hero-copy h1{font-size:42px}.hero-actions{align-items:stretch;flex-direction:column}.hero-trust{align-items:flex-start;flex-direction:column;margin-left:10px}.preview-heading{align-items:flex-start;flex-direction:column}.trust-visual strong{font-size:25px}}
 
+/* Interactive glow and elevation */
+.primary-cta,
+.secondary-cta,
+.nav-cta,
+.new-chat,
+.theme-toggle,
+.prompt-grid button,
+.prompt-suggestions button,
+.capability-grid article,
+.analysis-card,
+.evidence-item,
+.hero-product {
+  transition: transform .2s ease, border-color .2s ease, background-color .2s ease, box-shadow .25s ease, color .2s ease;
+}
+.primary-cta:hover,
+.landing-links .nav-cta:hover,
+.new-chat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(82,199,164,.32), 0 10px 26px rgba(8,123,98,.25), 0 0 28px rgba(82,199,164,.16);
+}
+.secondary-cta:hover,
+.theme-toggle:hover,
+.prompt-suggestions button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(8,123,98,.55);
+  box-shadow: 0 6px 18px rgba(21,89,71,.12), 0 0 20px rgba(82,199,164,.11);
+}
+.prompt-grid button:hover,
+.capability-grid article:hover,
+.evidence-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(8,123,98,.48);
+  box-shadow: 0 14px 32px rgba(24,48,58,.12), 0 0 0 1px rgba(82,199,164,.1), 0 0 30px rgba(82,199,164,.12);
+}
+.analysis-card:hover,
+.hero-product:hover {
+  border-color: rgba(8,123,98,.42);
+  box-shadow: 0 24px 55px rgba(20,41,50,.16), 0 0 38px rgba(82,199,164,.12);
+}
+.primary-cta:focus-visible,
+.secondary-cta:focus-visible,
+.nav-cta:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--emerald);
+  outline-offset: 3px;
+}
+:root[data-theme="dark"] .primary-cta:hover,
+:root[data-theme="dark"] .landing-links .nav-cta:hover,
+:root[data-theme="dark"] .new-chat:hover {
+  box-shadow: 0 0 0 1px rgba(105,212,178,.42), 0 12px 30px rgba(0,0,0,.35), 0 0 32px rgba(82,199,164,.22);
+}
+:root[data-theme="dark"] .secondary-cta:hover,
+:root[data-theme="dark"] .theme-toggle:hover,
+:root[data-theme="dark"] .prompt-suggestions button:hover {
+  box-shadow: 0 8px 20px rgba(0,0,0,.28), 0 0 24px rgba(82,199,164,.17);
+}
+:root[data-theme="dark"] .prompt-grid button:hover,
+:root[data-theme="dark"] .capability-grid article:hover,
+:root[data-theme="dark"] .evidence-item:hover,
+:root[data-theme="dark"] .analysis-card:hover,
+:root[data-theme="dark"] .hero-product:hover {
+  border-color: rgba(105,212,178,.48);
+  box-shadow: 0 18px 38px rgba(0,0,0,.34), 0 0 0 1px rgba(82,199,164,.12), 0 0 34px rgba(82,199,164,.18);
+}
+@media (hover: none) {
+  .primary-cta:hover,.secondary-cta:hover,.nav-cta:hover,.new-chat:hover,.theme-toggle:hover,
+  .prompt-grid button:hover,.prompt-suggestions button:hover,.capability-grid article:hover,
+  .analysis-card:hover,.evidence-item:hover,.hero-product:hover { transform: none; }
+}
+
 .markdown-content{margin-top:6px;color:#273246;font-size:14px;line-height:1.7;min-width:0}.markdown-content>*:first-child{margin-top:0}.markdown-content>*:last-child{margin-bottom:0}.markdown-content p{white-space:normal;margin:8px 0}.markdown-content strong{color:#182337}.markdown-content h1,.markdown-content h2,.markdown-content h3{color:#172033;line-height:1.3;margin:18px 0 7px}.markdown-content h1{font-size:20px}.markdown-content h2{font-size:17px}.markdown-content h3{font-size:15px}.markdown-content ul,.markdown-content ol{margin:8px 0;padding-left:22px}.markdown-content li{margin:4px 0}.markdown-content a{color:var(--emerald);font-weight:650;text-underline-offset:3px}.markdown-content blockquote{margin:12px 0;padding:8px 13px;border-left:3px solid #8bbcaf;background:#edf5f1;color:#47586a}.markdown-content code{font-family:"Cascadia Code",Consolas,monospace;font-size:.88em;background:#eae8e2;border-radius:4px;padding:2px 5px}.markdown-content pre{overflow-x:auto;background:var(--navy-2);color:#e7eef5;border-radius:10px;padding:13px}.markdown-content pre code{background:transparent;padding:0}.table-scroll{max-width:100%;overflow-x:auto;margin:13px 0;border:1px solid var(--line);border-radius:10px;background:var(--white)}.markdown-content table{width:100%;min-width:560px;border-collapse:collapse;font-size:11px;line-height:1.45}.markdown-content th{background:#edf3ef;color:#214b42;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em}.markdown-content th,.markdown-content td{padding:10px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);vertical-align:top}.markdown-content th:last-child,.markdown-content td:last-child{border-right:0}.markdown-content tr:last-child td{border-bottom:0}.markdown-content tbody tr:nth-child(even){background:#faf9f5}
