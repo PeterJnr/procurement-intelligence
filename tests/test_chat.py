@@ -98,7 +98,7 @@ class ChatTests(unittest.TestCase):
         with patch.dict(os.environ, {"ENABLE_CHAT_AI": "false"}):
             result = generate_chat_reply("Hello", "greeting", [], None)
 
-        self.assertIn("business-laptop", result)
+        self.assertIn("laptop", result)
 
     @patch("app.services.chat.get_conversation")
     @patch("app.services.chat.append_conversation_message")

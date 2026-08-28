@@ -50,8 +50,8 @@ export function LandingPage() {
           <div className="hero-glow hero-glow-one" /><div className="hero-glow hero-glow-two" />
           <div className="hero-copy">
             <span className="hero-kicker"><i /> Evidence before decisions</span>
-            <h1>Buy business laptops with <em>clarity.</em></h1>
-            <p>Procura AI turns supplier quotes into evidence-backed recommendations—so teams can compare pricing, understand risk, and defend every purchasing decision.</p>
+            <h1>Find the right laptop with <em>clarity.</em></h1>
+            <p>Procura AI turns your needs and supplier quotes into evidence-backed recommendations—whether the laptop is for work, study, creative projects, gaming, or a team purchase.</p>
             <div className="hero-actions">
               <a className="primary-cta" href="/app">Analyze a quote <ArrowRight size={17} /></a>
               <a className="secondary-cta" href="#how-it-works">See how it works</a>

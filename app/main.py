@@ -100,7 +100,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Procurement Intelligence Platform",
     description=(
-        "Evidence-backed business-laptop market analysis, semantic retrieval, "
+        "Evidence-backed laptop guidance and market analysis, semantic retrieval, "
         "feedback calibration, and contextual procurement chat."
     ),
     version="0.1.0",

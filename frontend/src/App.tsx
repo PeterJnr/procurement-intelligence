@@ -59,7 +59,7 @@ export default function App() {
       ];
     }
     return [
-      "Analyze a business laptop quote",
+      "Analyze a laptop quote",
       "What details do you need from me?",
       "How do you assess source reliability?",
     ];
