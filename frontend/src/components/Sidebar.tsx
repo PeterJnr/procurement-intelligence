@@ -18,7 +18,7 @@ export function Sidebar({ conversations, activeId, open, onClose, onNew, onSelec
       <aside className={`sidebar ${open ? "sidebar-open" : ""}`}>
         <div className="brand-row">
           <div className="brand-mark"><Sparkles size={19} /></div>
-          <div><strong>Procura AI</strong><span>Market intelligence</span></div>
+          <a className="brand-home" href="/"><strong>Procura AI</strong><span>Market intelligence</span></a>
           <button className="icon-button mobile-only" aria-label="Close menu" onClick={onClose}><X size={19} /></button>
         </div>
         <button className="new-chat" onClick={onNew}><Plus size={18} /> New analysis</button>
